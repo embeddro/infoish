@@ -45,7 +45,9 @@ class GitLabWikiWriter:
         return self._repo_url.replace("//", f"//{self._user}:{self._password}@")
 
     def make_md_file(self, data):
-        md_table = markdownTable(data).getMarkdown()
+        md_table = markdownTable(data) \
+            .setParams(row_sep='markdown', quote=False) \
+            .getMarkdown()
         with open(self.filename, "w", encoding='utf-8') as file:
             print(md_table, file=file)
 
@@ -82,11 +84,11 @@ class MockWriter:
     def write_data(self, data):
         self.mkdir()
         filename = os.path.join(self._path, self._filename)
-        md_table = markdownTable(data)
-        md_table.row_sep = None
-        table = md_table.getMarkdown()
+        md_table = markdownTable(data) \
+            .setParams(row_sep='markdown', quote=False) \
+            .getMarkdown()
         with open(filename, "w", encoding='utf-8') as file:
-            print(table, file=file)
+            print(md_table, file=file)
 
 
 class Infoish:
