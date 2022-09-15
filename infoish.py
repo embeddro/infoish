@@ -3,13 +3,47 @@ import os
 from shutil import rmtree
 from markdownTable import markdownTable
 from git import Repo
+from pyzabbix.api import ZabbixAPI
+import socket
 
+
+def resolve_dns(name: str):
+    try:
+        ip = socket.gethostbyname(name)
+    except socket.gaierror as err:
+        return ''
+    return ip
 
 class ZabbixReader:
     """ Класс для получения данных с Zabbix"""
+    def __init__(self, url, user, password):
+        self._url = url
+        self._user = user
+        self._password = password
+        self._data = []
+        self._zapi = ZabbixAPI(url=self._url,
+                               user=self._user,
+                               password=self._password)
+    @property
+    def _row_data(self):
+        return self._zapi.host.get(output=["host", "status", "description"])
+
+    def _handle_data(self):
+        for item in self._row_data:
+            self._data.append(
+                {
+                    "Host": item['host'],
+                    "ip": resolve_dns(item['host']),
+                    "Окружение": item['description'],
+                    "Сервисы": item['description'],
+                    "Состояние": "выкл" if item["status"] == "1" else "вкл"
+                }
+            )
+
     def get_data(self):
-        """ должна возвращать массив данных"""
-        return []
+        """ возвращает массив данных"""
+        self._handle_data()
+        return self._data
 
 class GitLabWikiWriter:
     """Класс для записи данных в GitlabWiki"""
