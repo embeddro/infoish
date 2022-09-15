@@ -13,10 +13,10 @@ if __name__ == '__main__':
     reader = infoish.ZabbixReader(url=zabbix_url,
                                   user=zabbix_user,
                                   password=zabbix_password)
-    # writer = infoish.GitLabWikiWriter(repo_url=gitlab_url_repo,
-    #                                   user=gitlab_user,
-    #                                   password=gitlab_password)
-    writer = infoish.MockWriter('tmp')
+    writer = infoish.GitLabWikiWriter(repo_url=gitlab_url_repo,
+                                      user=gitlab_user,
+                                      password=gitlab_password)
+    # writer = infoish.MockWriter('tmp')
     worker = infoish.Infoish()
     worker.add_reader(reader)
     worker.add_writer(writer)

@@ -39,7 +39,7 @@ class ZabbixReader:
                                password=self._password)
     @property
     def _row_data(self):
-        return self._zapi.host.get(output=["host", "status", "description"])
+        return self._zapi.host.get(output=["host", "description"])
 
     def _handle_data(self):
         for item in self._row_data:
@@ -50,8 +50,7 @@ class ZabbixReader:
                     "Окружение": get_from_json(item['description'], 'environ'),
                     "Тип": get_from_json(item['description'], 'type'),
                     "Сервисы": get_from_json(item['description'], 'services'),
-                    "Описание": get_from_json(item['description'], 'description'),
-                    "Состояние": "выкл" if item["status"] == "1" else "вкл"
+                    "Описание": get_from_json(item['description'], 'description')
                 }
             )
 
@@ -158,7 +157,11 @@ class Infoish:
         for reader in self._readers:
             self._data += reader.get_data()
 
+    def sort(self, key):
+        self._data = sorted(self._data, key=lambda i: i[key], reverse=True)
+
     def write_data(self):
         """Пишем данные"""
+        self.sort('Окружение')
         for writer in self._writers:
             writer.write_data(self._data)
