@@ -5,8 +5,6 @@ from markdownTable import markdownTable
 from git import Repo
 from pyzabbix.api import ZabbixAPI
 import socket
-import json
-from json.decoder import JSONDecodeError
 
 
 def resolve_dns(name: str):
@@ -15,17 +13,6 @@ def resolve_dns(name: str):
     except socket.gaierror as err:
         return ''
     return ip
-
-def get_from_json(j_str: str, key: str) -> str:
-    try:
-        data = json.loads(j_str)
-    except JSONDecodeError as err:
-        return ''
-    result = data.get(key, '')
-    if type(result) == list:
-        result = '<br>'.join(result)
-    return result
-
 
 class ZabbixReader:
     """ Класс для получения данных с Zabbix"""
@@ -47,10 +34,7 @@ class ZabbixReader:
                 {
                     "Host": item['host'],
                     "ip": resolve_dns(item['host']),
-                    "Окружение": get_from_json(item['description'], 'environ'),
-                    "Тип": get_from_json(item['description'], 'type'),
-                    "Сервисы": get_from_json(item['description'], 'services'),
-                    "Описание": get_from_json(item['description'], 'description')
+                    "Описание": item['description']
                 }
             )
 
@@ -162,6 +146,6 @@ class Infoish:
 
     def write_data(self):
         """Пишем данные"""
-        self.sort('Окружение')
+        self.sort('Host')
         for writer in self._writers:
             writer.write_data(self._data)
